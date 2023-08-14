@@ -1,78 +1,60 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React from 'react'
+import { useState,useEffect } from 'react'
+import axios from 'axios'
 
-function App() {
-  const [userData, setUserData] = useState([]);
-  const [albumsData, setAlbumsData] = useState([]);
-  const [photosData, setPhotosData] = useState([]);
-  const [dataLoaded, setDataLoaded] = useState(false);
+const App = () => {
+const [data,setData]=useState([])
+const [childData,setChildData]=useState([])
 
-  useEffect(() => {
+const GetPokeData=async(api)=>{
+  let dataApi = 'https://pokeapi.co/api/v2'
+  const data= await axios.get(api? api : dataApi);
+  if(api){
+    setChildData(data?.data?.results)
+  }
+  else{
+  setData(data.data)}
+}
+useEffect(()=>{
+  GetPokeData();
+},[])
+  const keyValueArray = Object.keys(data).map(key => ({
+    key: key,
+    value: data[key]
+  }));
   
-    axios.get("https://jsonplaceholder.typicode.com/users")
-      .then(response => {
-        setUserData(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching users:", error);
-      });
-
-
-    axios.get("https://jsonplaceholder.typicode.com/albums")
-      .then(response => {
-        setAlbumsData(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching albums:", error);
-      });
-
-    axios.get("https://jsonplaceholder.typicode.com/photos")
-      .then(response => {
-        setPhotosData(response.data);
-      })
-      .catch(error => {
-        console.error("Error fetching photos:", error);
-      });
-  }, []);
-
-  useEffect(() => {
-    if (userData.length > 0 && albumsData.length > 0 && photosData.length > 0) {
-      setDataLoaded(true);
-    }
-  }, [userData, albumsData, photosData]);
-
   return (
-    <div className="App">
-      <h1>User Albums and Photos</h1>
-      {dataLoaded ? (
-        userData.map(user => (
-          <div key={user.id}>
-            <h2>{user.name}</h2>
-            {albumsData
-              .filter(album => album.userId === user.id)
-              .map(album => (
-                <div key={album.id}>
-                  <h3>Album: {album.title}</h3>
-                  <div className="photos">
-                    {photosData
-                      .filter(photo => photo.albumId === album.id)
-                      .map(photo => (
-                        <img
-                          key={photo.id}
-                          src={photo.thumbnailUrl}
-                          alt={photo.title}
-                        />
-                      ))}
-                  </div>
-                </div>
-              ))}
-          </div>
+<div >
+  <table>
+    <thead>
+      <tr>
+        <th>Data</th>
+        <th>Value</th>
+      </tr>
+    </thead>
+    <tbody>
+      {childData.length > 0 ? (
+        childData.map((item, index) => (
+          <tr key={index}>
+            <td style={{fontWeight:'bold', paddingLeft:'12px'}} >{item.name}</td>
+            <td>{item.url}</td>
+          </tr>
         ))
       ) : (
-        <p>Loading data...</p>
+        keyValueArray.map((item, index) => (
+          <tr key={index}>
+            <td style={{cursor:'pointer', fontWeight:'bold', paddingLeft:'12px'}} onClick={() => { GetPokeData(item.value) }}>{item.key}</td>
+            <td >{item.value}</td>
+          </tr>
+        ))
       )}
-    </div>
-  );
+    </tbody>
+  </table>
+</div>
+
+  
+  
+  )
 }
 
-export default App;
+export default App
